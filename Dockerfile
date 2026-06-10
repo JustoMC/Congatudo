@@ -18,7 +18,7 @@ USER node:node
 WORKDIR /usr/src/app
 
 # Copy the current repository checkout into the build image
-COPY . .
+COPY --chown=node:node . .
 
 # Build environment
 ENV NODE_ENV=production
