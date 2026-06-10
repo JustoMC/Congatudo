@@ -8,7 +8,7 @@ permissions:
   packages: write
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAMESPACE: ${{ github.repository_owner }}
+  IMAGE_NAMESPACE: justomc
   IMAGE_NAME: congatudo
 jobs:
   matrix:
