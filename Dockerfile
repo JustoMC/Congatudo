@@ -17,11 +17,8 @@ USER node:node
 # Working directory
 WORKDIR /usr/src/app
 
-# Force cache invalidation
-ADD https://api.github.com/repos/congatudo/Congatudo/git/refs/heads/master /usr/src/version.json
-
-# Download valetudo
-RUN git clone --depth 1 https://github.com/congatudo/Congatudo --single-branch .
+# Copy the current repository checkout into the build image
+COPY . .
 
 # Build environment
 ENV NODE_ENV=production
