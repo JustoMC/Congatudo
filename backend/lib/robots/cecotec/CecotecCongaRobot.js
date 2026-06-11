@@ -260,15 +260,6 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
         return "Conga";
     }
 
-    /**
-     * @returns {ModelDetails}
-     */
-    getModelDetails() {
-        return {
-            supportedAttachments: [AttachmentStateAttribute.TYPE.DUSTBIN, AttachmentStateAttribute.TYPE.WATERTANK, AttachmentStateAttribute.TYPE.MOP],
-        };
-    }
-
     async shutdown() {
         await this.server.close();
     }
@@ -931,5 +922,18 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
         Logger.trace("Software version: " + result.software_version);
 
         return Boolean(result.software_version);
+    }
+
+    /**
+     * @typedef {object} ModelDetails
+     * @property {Array<import("../../entities/state/attributes/AttachmentStateAttribute").AttachmentStateAttributeType>} supportedAttachments
+     */
+    /**
+     * @returns {ModelDetails}
+     */
+    getModelDetails() {
+        return {
+            supportedAttachments: [AttachmentStateAttribute.TYPE.DUSTBIN, AttachmentStateAttribute.TYPE.WATERTANK, AttachmentStateAttribute.TYPE.MOP],
+        };
     }
 };
