@@ -1,7 +1,8 @@
 # Stage 1
+ARG BUILDPLATFORM
 ARG BUILD_FROM=amd64/alpine:3.18
 ARG BUILD_PLATFORM=linux/amd64
-FROM node:20-alpine AS build_image
+FROM --platform=${BUILDPLATFORM} node:20-alpine AS build_image
 
 # Install dependencies
 RUN apk update && \
