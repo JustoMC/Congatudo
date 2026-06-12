@@ -20,4 +20,5 @@ module.exports = {
     CecotecWaterUsageControlCapability: require("./CecotecWaterUsageControlCapability"),
     CecotecWifiConfigurationCapability: require("./CecotecWifiConfigurationCapability"),
     CecotecZoneCleaningCapability: require("./CecotecZoneCleaningCapability"),
+    CecotecOperationModeControlCapability: require("./CecotecOperationModeControlCapability"),
 };

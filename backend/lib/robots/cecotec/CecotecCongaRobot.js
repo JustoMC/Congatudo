@@ -34,6 +34,11 @@ const DEVICE_MODE_TO_STATUS_STATE_FLAG = {
     [DeviceMode.VALUE.ZONE]: StatusStateAttribute.FLAG.ZONE,
 };
 
+const OPERATION_MODE_TO_DEVICE_MODE = {
+    vacuum: DeviceMode.VALUE.NONE,
+    vacuum_and_mop: DeviceMode.VALUE.MOP,
+};
+
 /** @type {Set<string>} */
 const NON_BLOCKING_DEVICE_ERRORS = new Set([
     DeviceError.VALUE.GLOBAL_APPOINT_CLEAN,
@@ -239,6 +244,14 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
                 robot: this,
             })
         );
+        this.registerCapability(
+            new capabilities.CecotecOperationModeControlCapability({
+                robot: this,
+                presets: Object.entries(OPERATION_MODE_TO_DEVICE_MODE).map(([name, value]) => {
+                    return new SelectionPreset({ name: name, value: value });
+                }),
+            })
+        );
 
         this.server.on("error", this.onError.bind(this));
         this.server.on("addRobot", this.onAddRobot.bind(this));
@@ -339,6 +352,14 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
         );
         this.state.upsertFirstMatchingAttribute(
             new OperationModeStateAttribute({
+                value: robot.device.hasMopAttached ?
+                    OperationModeStateAttribute.VALUE.VACUUM_AND_MOP :
+                    OperationModeStateAttribute.VALUE.VACUUM,
+            })
+        );
+        this.state.upsertFirstMatchingAttribute(
+            new PresetSelectionStateAttribute({
+                type: PresetSelectionStateAttribute.TYPE.OPERATION_MODE,
                 value: robot.device.hasMopAttached ?
                     OperationModeStateAttribute.VALUE.VACUUM_AND_MOP :
                     OperationModeStateAttribute.VALUE.VACUUM,
@@ -839,7 +860,7 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
      */
     getStatusState(robot) {
         const { state, mode, error } = robot.device;
-        const flag =
+        const flag = 
       DEVICE_MODE_TO_STATUS_STATE_FLAG[mode?.value] ||
       StatusStateAttribute.FLAG.NONE;
         const errorValue = error && error.value !== DeviceError.VALUE.NONE ? error.value : undefined;
