@@ -1,4 +1,5 @@
 const capabilities = require("./capabilities");
+const CombinedVirtualRestrictionsCapability = require("../../core/capabilities/CombinedVirtualRestrictionsCapability");
 const fs = require("fs");
 const Logger = require("../../Logger");
 const PendingMapChangeValetudoEvent = require("../../valetudo_events/events/PendingMapChangeValetudoEvent");
@@ -304,6 +305,10 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
         const oldStatus =
       this.state.getFirstMatchingAttributeByConstructor(StatusStateAttribute);
         const newStatus = this.getStatusState(robot);
+        const previousMopAttachmentState = this.state.getFirstMatchingAttribute({
+            attributeClass: AttachmentStateAttribute.name,
+            attributeType: AttachmentStateAttribute.TYPE.MOP
+        });
 
         // Reset path points when robot goes from docked to another state.
         if (
@@ -345,6 +350,13 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
             })
         );
 
+        if (
+            previousMopAttachmentState &&
+            previousMopAttachmentState.attached !== robot.device.hasMopAttached
+        ) {
+            this.applyVirtualRestrictionsAfterMopAttachmentChange(robot);
+        }
+
         this.emitStateAttributesUpdated();
 
         if (robot.device.hasWaitingMap) {
@@ -353,6 +365,21 @@ module.exports = class CecotecCongaRobot extends ValetudoRobot {
             if (!this.valetudoEventStore.getById(event.id)) {
                 this.valetudoEventStore.raise(event);
             }
+        }
+    }
+
+    /**
+     * @param {import("@agnoc/core").Robot} robot
+     */
+    applyVirtualRestrictionsAfterMopAttachmentChange(robot) {
+        const capability = this.capabilities[CombinedVirtualRestrictionsCapability.TYPE];
+
+        if (capability && typeof capability.applyCurrentProfile === "function") {
+            Logger.info("Mop attachment state changed; applying matching Cecotec virtual restriction profile");
+
+            capability.applyCurrentProfile(robot).catch(err => {
+                Logger.warn("Unable to apply Cecotec virtual restriction profile after mop attachment change", err);
+            });
         }
     }
 
